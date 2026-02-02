@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../supabaseARSILA/supabase';
+import { supabase } from '../supabase';
 
 interface PasswordChangeCardProps {
     onPasswordChanged: (newPassword: string) => void;

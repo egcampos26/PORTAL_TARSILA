@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import WelcomeCard from './components/WelcomeCard';
 import LoginCard from './components/LoginCard';
-import PasswordChangeCard from '../components/PasswordChangeCard';
+import PasswordChangeCard from './components/PasswordChangeCard';
 import Dashboard from './components/Dashboard';
 import { AppScreen, User } from './types';
 

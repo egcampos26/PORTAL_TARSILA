@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { MFEConfig } from '../types';
 
 interface DashboardProps {
+  userId: string;
   userEmail: string;
   userName: string;
   userGender: 'M' | 'F';
@@ -52,7 +53,7 @@ const AppTile: React.FC<AppTileProps> = ({ title, icon, bgColor, onClick, isNew 
   );
 };
 
-const Dashboard: React.FC<DashboardProps> = ({ userEmail, userName, userGender, userRole, onLogout }) => {
+const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, userGender, userRole, onLogout }) => {
   const [activeApp, setActiveApp] = useState<MFEConfig | null>(null);
   const [isLoadingApp, setIsLoadingApp] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -119,6 +120,21 @@ const Dashboard: React.FC<DashboardProps> = ({ userEmail, userName, userGender, 
   };
 
   const greeting = userGender === 'F' ? 'SEJA BEM-VINDA' : 'SEJA BEM-VINDO';
+
+  // Helper to construct the correct URL for each app
+  const getAppUrl = (app: MFEConfig) => {
+    if (app.id === 'carometro-alunos') {
+      return `${import.meta.env.VITE_CAROMETRO_URL || app.url}/#/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`;
+    }
+
+    if (app.id === 'carometro-funcionarios') {
+      // Carometro Funcionarios uses HashRouter and expects user_id
+      return `${app.url}/#/?user_id=${userId}`;
+    }
+
+    // Default for other apps
+    return `${app.url}?user=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
+  };
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col">
@@ -225,11 +241,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userEmail, userName, userGender, 
           <div className={`absolute inset-0 animate-mfe-enter flex flex-col ${activeApp.id === 'carometro-alunos' ? 'p-0 bg-white' : 'p-1 md:p-8 bg-white'}`}>
             <div className={`flex-1 w-full h-full border-none overflow-hidden ${activeApp.id === 'carometro-alunos' ? 'bg-white' : 'bg-slate-50'}`}>
               <iframe
-                src={
-                  activeApp.id === 'carometro-alunos'
-                    ? `${import.meta.env.VITE_CAROMETRO_URL || activeApp.url}/#/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`
-                    : `${activeApp.url}?user=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`
-                }
+                src={getAppUrl(activeApp)}
                 title={activeApp.title}
                 style={
                   activeApp.id === 'carometro-alunos'

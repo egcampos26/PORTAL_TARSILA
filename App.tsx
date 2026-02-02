@@ -23,6 +23,7 @@ const App: React.FC = () => {
 
   const handleLogin = (userData: any) => {
     const mappedUser: User = {
+      id: userData.user_id,
       name: userData.name,
       email: userData.email,
       role: userData.category || 'User',
@@ -59,6 +60,7 @@ const App: React.FC = () => {
   if (screen === AppScreen.DASHBOARD && user) {
     return (
       <Dashboard
+        userId={user.id}
         userEmail={user.email}
         userName={user.name}
         userGender={user.gender}

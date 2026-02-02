@@ -10,6 +10,7 @@ interface PasswordChangeCardProps {
 
 const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChanged, onCancel, userEmail, userId }) => {
     const [username, setUsername] = useState('');
+    const [cpf, setCpf] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,13 +18,31 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const validatePassword = (password: string) => {
-        if (password.length < 6) return "A senha deve ter pelo menos 6 caracteres.";
-        if (!/[A-Z]/.test(password)) return "A senha deve conter pelo menos uma letra maiúscula.";
-        if (!/[a-z]/.test(password)) return "A senha deve conter pelo menos uma letra minúscula.";
-        if (!/[0-9]/.test(password)) return "A senha deve conter pelo menos um número.";
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return "A senha deve conter pelo menos um caractere especial.";
-        return null;
+    // Requisitos de senha
+    const requirements = [
+        { label: "Pelo menos 6 caracteres", test: (pw: string) => pw.length >= 6 },
+        { label: "Uma letra maiúscula", test: (pw: string) => /[A-Z]/.test(pw) },
+        { label: "Uma letra minúscula", test: (pw: string) => /[a-z]/.test(pw) },
+        { label: "Um número", test: (pw: string) => /[0-9]/.test(pw) },
+        { label: "Um caractere especial (!@#$%^&*)", test: (pw: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pw) },
+    ];
+
+    const isPasswordValid = requirements.every(req => req.test(newPassword));
+    const isCpfValid = cpf.replace(/\D/g, '').length === 11;
+
+    const formatCpf = (value: string) => {
+        const digits = value.replace(/\D/g, '');
+        return digits
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+            .replace(/(-\d{2})\d+?$/, '$1');
+    };
+
+    const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatCpf(e.target.value);
+        setCpf(formatted);
+        setError(null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -34,9 +53,13 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
             return;
         }
 
-        const passwordError = validatePassword(newPassword);
-        if (passwordError) {
-            setError(passwordError);
+        if (!isCpfValid) {
+            setError("Informe um CPF válido (11 dígitos).");
+            return;
+        }
+
+        if (!isPasswordValid) {
+            setError("A senha não atende a todos os requisitos.");
             return;
         }
 
@@ -52,7 +75,8 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
             const { data, error: rpcError } = await supabase.rpc('update_user_password', {
                 user_id_input: userId,
                 new_password_input: newPassword,
-                new_username_input: username
+                new_username_input: username,
+                cpf_input: cpf.replace(/\D/g, '') // Send only digits
             });
 
             if (rpcError) throw rpcError;
@@ -60,11 +84,10 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
             if (data) {
                 onPasswordChanged(newPassword);
             } else {
-                setError("Erro ao atualizar senha. Usuário não encontrado.");
+                setError("Erro ao atualizar senha. Verifique se o CPF e usuário estão corretos.");
             }
         } catch (err: any) {
             console.error("Password update error:", err);
-            // Captura a mensagem de erro específica do banco de dados (ex: 'Este nome de usuário já está em uso.')
             const errorMessage = err.message || err.details || "Erro de conexão com o Supabase.";
             setError(errorMessage);
         } finally {
@@ -77,7 +100,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Primeiro Acesso</h2>
                 <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest">
-                    Para sua segurança e vinculação com o Portal, você deve definir seu nome de usuário e alterar sua senha inicial.
+                    Para sua segurança e vinculação com o Portal, você deve validar seu CPF, definir seu nome de usuário e alterar sua senha inicial.
                 </p>
             </div>
 
@@ -86,17 +109,32 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
                     <label className="text-[10px] text-white/70 font-bold uppercase tracking-widest ml-1">E-mail: {userEmail}</label>
                 </div>
 
-                <div className="space-y-1">
-                    <label className="text-[10px] text-white/70 font-bold uppercase tracking-widest ml-1">Nome de Usuário</label>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => { setUsername(e.target.value); setError(null); }}
-                        placeholder="Crie seu nome de usuário"
-                        className="w-full px-5 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all border-none"
-                        required
-                        disabled={isLoading}
-                    />
+                <div className="grid grid-cols-1 gap-5">
+                    <div className="space-y-1">
+                        <label className="text-[10px] text-white/70 font-bold uppercase tracking-widest ml-1">CPF (Segurança)</label>
+                        <input
+                            type="text"
+                            value={cpf}
+                            onChange={handleCpfChange}
+                            placeholder="000.000.000-00"
+                            className="w-full px-5 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all border-none font-bold"
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-[10px] text-white/70 font-bold uppercase tracking-widest ml-1">Nome de Usuário</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => { setUsername(e.target.value); setError(null); }}
+                            placeholder="Crie seu nome de usuário"
+                            className="w-full px-5 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all border-none font-bold"
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
                 </div>
 
                 <div className="space-y-1">
@@ -107,7 +145,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
                             value={newPassword}
                             onChange={(e) => { setNewPassword(e.target.value); setError(null); }}
                             placeholder="Digite a nova senha"
-                            className="w-full px-5 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all border-none pr-12"
+                            className="w-full px-5 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all border-none pr-12 font-bold"
                             required
                             disabled={isLoading}
                         />
@@ -129,14 +167,27 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
                             )}
                         </button>
                     </div>
-                    <div className="px-1 pt-1">
-                        <p className="text-[11px] text-white/80 leading-relaxed font-medium">
-                            A senha deve ter pelo menos 6 caracteres, incluindo:<br />
-                            • Letra Maiúscula<br />
-                            • Letra Minúscula<br />
-                            • Número<br />
-                            • Caractere Especial (!@#$%^&*)
-                        </p>
+                    <div className="px-1 pt-3 space-y-1.5">
+                        <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mb-1.5">Requisitos da Senha:</p>
+                        {requirements.map((req, index) => {
+                            const met = req.test(newPassword);
+                            return (
+                                <div key={index} className="flex items-center gap-2 transition-all duration-300">
+                                    <div className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center transition-colors ${met ? 'bg-green-400' : 'bg-white/10'}`}>
+                                        {met ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 text-[#3b5998]">
+                                                <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+                                            </svg>
+                                        ) : (
+                                            <div className="w-1 h-1 bg-white/30 rounded-full" />
+                                        )}
+                                    </div>
+                                    <span className={`text-[11px] font-medium transition-colors ${met ? 'text-green-300' : 'text-white/60'}`}>
+                                        {req.label}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -148,7 +199,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
                             value={confirmPassword}
                             onChange={(e) => { setConfirmPassword(e.target.value); setError(null); }}
                             placeholder="Confirme a nova senha"
-                            className="w-full px-5 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all border-none pr-12"
+                            className="w-full px-5 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all border-none pr-12 font-bold"
                             required
                             disabled={isLoading}
                         />
@@ -182,7 +233,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
                     <button
                         type="submit"
                         className="w-full bg-white text-blue-600 font-black py-4 rounded-xl text-sm shadow-xl hover:bg-slate-50 active:scale-95 transition-all uppercase tracking-[0.2em] disabled:opacity-50"
-                        disabled={isLoading}
+                        disabled={isLoading || !isPasswordValid || !isCpfValid}
                     >
                         {isLoading ? 'Vinculando...' : 'Salvar e Acessar'}
                     </button>

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MFEConfig } from '../PORTAL_TARSILA/types';
+import { MFEConfig } from '../types';
 
 interface DashboardProps {
   userEmail: string;

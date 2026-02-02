@@ -111,8 +111,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userEmail, userName, userGender, 
   };
 
   const handleOpenSettings = () => {
-    setActiveApp(null);
-    setIsSettingsOpen(true);
+    if (isSettingsOpen) {
+      handleCloseApp();
+    } else {
+      setActiveApp(null);
+      setIsSettingsOpen(true);
+    }
   };
 
   const greeting = userGender === 'F' ? 'SEJA BEM-VINDA' : 'SEJA BEM-VINDO';

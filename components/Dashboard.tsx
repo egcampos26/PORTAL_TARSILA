@@ -128,8 +128,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
     }
 
     if (app.id === 'carometro-funcionarios') {
-      // Carometro Funcionarios uses HashRouter and expects user_id
-      return `${app.url}/#/?user_id=${userId}`;
+      // Carometro Funcionarios uses HashRouter and expects user_id in the search params (before hash)
+      // because AuthContext uses window.location.search
+      return `${app.url}?user_id=${userId}#/`;
     }
 
     // Default for other apps

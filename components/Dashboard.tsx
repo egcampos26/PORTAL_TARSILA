@@ -99,10 +99,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userEmail, userName, userGender, 
   const handleOpenApp = (app: MFEConfig) => {
     setIsSettingsOpen(false);
     setIsLoadingApp(true);
-    setTimeout(() => {
-      setActiveApp(app);
-      setIsLoadingApp(false);
-    }, 800);
+    // Remove the timeout that was hiding the loading overlay prematurely.
+    // The overlay will now be hidden by the onLoad event of the iframe.
+    setActiveApp(app);
   };
 
   const handleCloseApp = () => {

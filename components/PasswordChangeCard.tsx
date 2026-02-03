@@ -10,7 +10,7 @@ interface PasswordChangeCardProps {
 
 const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChanged, onCancel, userEmail, userId }) => {
     const [username, setUsername] = useState('');
-    const [cpf, setCpf] = useState('');
+    // CPF state removed
     const [newPassword, setNewPassword] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,22 +28,9 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
     ];
 
     const isPasswordValid = requirements.every(req => req.test(newPassword));
-    const isCpfValid = cpf.replace(/\D/g, '').length === 11;
+    // CPF validation removed
 
-    const formatCpf = (value: string) => {
-        const digits = value.replace(/\D/g, '');
-        return digits
-            .replace(/(\d{3})(\d)/, '$1.$2')
-            .replace(/(\d{3})(\d)/, '$1.$2')
-            .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-            .replace(/(-\d{2})\d+?$/, '$1');
-    };
-
-    const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const formatted = formatCpf(e.target.value);
-        setCpf(formatted);
-        setError(null);
-    };
+    // CPF helper functions removed
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,10 +40,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
             return;
         }
 
-        if (!isCpfValid) {
-            setError("Informe um CPF válido (11 dígitos).");
-            return;
-        }
+        // CPF validation block removed
 
         if (!isPasswordValid) {
             setError("A senha não atende a todos os requisitos.");
@@ -76,7 +60,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
                 user_id_input: userId,
                 new_password_input: newPassword,
                 new_username_input: username,
-                cpf_input: cpf.replace(/\D/g, '') // Send only digits
+                // cpf_input removed, defaulting to NULL in backend
             });
 
             if (rpcError) throw rpcError;
@@ -100,7 +84,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Primeiro Acesso</h2>
                 <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest">
-                    Para sua segurança e vinculação com o Portal, você deve validar seu CPF, definir seu nome de usuário e alterar sua senha inicial.
+                    Para sua segurança e vinculação com o Portal, você deve definir seu nome de usuário e alterar sua senha inicial.
                 </p>
             </div>
 
@@ -110,18 +94,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
                 </div>
 
                 <div className="grid grid-cols-1 gap-5">
-                    <div className="space-y-1">
-                        <label className="text-[10px] text-white/70 font-bold uppercase tracking-widest ml-1">CPF (Segurança)</label>
-                        <input
-                            type="text"
-                            value={cpf}
-                            onChange={handleCpfChange}
-                            placeholder="000.000.000-00"
-                            className="w-full px-5 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all border-none font-bold"
-                            required
-                            disabled={isLoading}
-                        />
-                    </div>
+                    {/* CPF field removed */}
 
                     <div className="space-y-1">
                         <label className="text-[10px] text-white/70 font-bold uppercase tracking-widest ml-1">Nome de Usuário</label>
@@ -233,7 +206,7 @@ const PasswordChangeCard: React.FC<PasswordChangeCardProps> = ({ onPasswordChang
                     <button
                         type="submit"
                         className="w-full bg-white text-blue-600 font-black py-4 rounded-xl text-sm shadow-xl hover:bg-slate-50 active:scale-95 transition-all uppercase tracking-[0.2em] disabled:opacity-50"
-                        disabled={isLoading || !isPasswordValid || !isCpfValid}
+                        disabled={isLoading || !isPasswordValid}
                     >
                         {isLoading ? 'Vinculando...' : 'Salvar e Acessar'}
                     </button>

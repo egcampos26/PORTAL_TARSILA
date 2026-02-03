@@ -1,6 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MFEConfig } from '../types';
+import {
+  sendAuthDataToMFE,
+  createMFEMessageListener,
+  waitForIframeReady
+} from '../postMessageUtils';
 
 interface DashboardProps {
   userId: string;
@@ -58,6 +63,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
   const [isLoadingApp, setIsLoadingApp] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAltHeader, setIsAltHeader] = useState(false);
+  const carometroFuncIframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const apps: MFEConfig[] = [
     {
@@ -97,11 +103,34 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
     },
   ];
 
+  // PostMessage handler for MFE responses
+  useEffect(() => {
+    const messageListener = createMFEMessageListener(
+      () => {
+        // On auth success, hide loading overlay
+        console.log('[Portal] MFE authenticated successfully via PostMessage');
+        setIsLoadingApp(false);
+      },
+      (error) => {
+        // On auth failure, log error but keep showing app
+        console.error('[Portal] MFE authentication failed:', error);
+        setIsLoadingApp(false);
+      },
+      () => {
+        console.log('[Portal] MFE is ready to receive messages');
+      }
+    );
+
+    window.addEventListener('message', messageListener);
+
+    return () => {
+      window.removeEventListener('message', messageListener);
+    };
+  }, []);
+
   const handleOpenApp = (app: MFEConfig) => {
     setIsSettingsOpen(false);
     setIsLoadingApp(true);
-    // Remove the timeout that was hiding the loading overlay prematurely.
-    // The overlay will now be hidden by the onLoad event of the iframe.
     setActiveApp(app);
     setIsAltHeader(true); // Auto-switch to white header when app opens
   };
@@ -130,13 +159,52 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
     }
 
     if (app.id === 'carometro-funcionarios') {
-      // Carometro Funcionarios uses HashRouter and expects user_id in the search params (before hash)
-      // because AuthContext uses window.location.search
-      return `${app.url}?user_id=${userId}#/`;
+      // For PostMessage communication, load without sensitive URL params
+      // Auth data will be sent via PostMessage after iframe loads
+      return `${app.url}#/`;
     }
 
     // Default for other apps
     return `${app.url}?user=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
+  };
+
+  // Handler for iframe load - sends auth data via PostMessage
+  const handleIframeLoad = async () => {
+    if (activeApp?.id === 'carometro-funcionarios' && carometroFuncIframeRef.current) {
+      console.log('[Portal] Carometro iframe loaded, waiting for ready state...');
+
+      // Wait for iframe to be fully ready
+      const isReady = await waitForIframeReady(carometroFuncIframeRef.current);
+
+      if (isReady) {
+        // Send auth data via PostMessage
+        const success = sendAuthDataToMFE(
+          carometroFuncIframeRef.current,
+          {
+            userId,
+            userName,
+            userEmail,
+            userRole,
+            userGender
+          },
+          activeApp.url
+        );
+
+        if (success) {
+          console.log('[Portal] Auth data sent successfully via PostMessage');
+        } else {
+          console.error('[Portal] Failed to send auth data via PostMessage');
+          // Fallback: Keep loading overlay hidden anyway
+          setIsLoadingApp(false);
+        }
+      } else {
+        console.error('[Portal] Iframe failed to reach ready state');
+        setIsLoadingApp(false);
+      }
+    } else {
+      // For other apps, just hide loading overlay on load
+      setIsLoadingApp(false);
+    }
   };
 
   return (
@@ -232,6 +300,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
           <div className={`absolute inset-0 animate-mfe-enter flex flex-col ${(activeApp.id === 'carometro-alunos' || activeApp.id === 'carometro-funcionarios') ? 'p-0 bg-white' : 'p-1 md:p-8 bg-white'}`}>
             <div className={`flex-1 w-full h-full border-none overflow-hidden ${(activeApp.id === 'carometro-alunos' || activeApp.id === 'carometro-funcionarios') ? 'bg-white' : 'bg-slate-50'}`}>
               <iframe
+                ref={activeApp.id === 'carometro-funcionarios' ? carometroFuncIframeRef : null}
                 src={getAppUrl(activeApp)}
                 title={activeApp.title}
                 style={
@@ -240,7 +309,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
                     : { width: '100%', height: '100%', border: 'none' }
                 }
                 className={(activeApp.id !== 'carometro-alunos' && activeApp.id !== 'carometro-funcionarios') ? "w-full h-full border-none" : "w-full h-full border-none mx-auto block"}
-                onLoad={() => setIsLoadingApp(false)}
+                onLoad={handleIframeLoad}
               />
             </div>
           </div>

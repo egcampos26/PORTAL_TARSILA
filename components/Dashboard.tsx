@@ -63,7 +63,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
   const [isLoadingApp, setIsLoadingApp] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAltHeader, setIsAltHeader] = useState(false);
-  const carometroFuncIframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const apps: MFEConfig[] = [
     {
@@ -79,13 +78,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
       bgColor: "bg-[#2563eb]",
       url: import.meta.env.VITE_CAROMETRO_URL || "http://localhost:3001",
       icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" /></svg>
-    },
-    {
-      id: 'carometro-funcionarios',
-      title: "Carometro Funcionários",
-      bgColor: "bg-[#3b82f6]",
-      url: import.meta.env.VITE_CAROMETRO_FUNC_URL || "https://carometro-funcionarios.vercel.app",
-      icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
     },
     {
       id: 'almoxarifado-pedagogico',
@@ -158,53 +150,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
       return `${import.meta.env.VITE_CAROMETRO_URL || app.url}/#/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`;
     }
 
-    if (app.id === 'carometro-funcionarios') {
-      // For PostMessage communication, load without sensitive URL params
-      // Auth data will be sent via PostMessage after iframe loads
-      return `${app.url}#/`;
-    }
-
     // Default for other apps
     return `${app.url}?user=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
   };
 
-  // Handler for iframe load - sends auth data via PostMessage
-  const handleIframeLoad = async () => {
-    if (activeApp?.id === 'carometro-funcionarios' && carometroFuncIframeRef.current) {
-      console.log('[Portal] Carometro iframe loaded, waiting for ready state...');
-
-      // Wait for iframe to be fully ready
-      const isReady = await waitForIframeReady(carometroFuncIframeRef.current);
-
-      if (isReady) {
-        // Send auth data via PostMessage
-        const success = sendAuthDataToMFE(
-          carometroFuncIframeRef.current,
-          {
-            userId,
-            userName,
-            userEmail,
-            userRole,
-            userGender
-          },
-          activeApp.url
-        );
-
-        if (success) {
-          console.log('[Portal] Auth data sent successfully via PostMessage');
-        } else {
-          console.error('[Portal] Failed to send auth data via PostMessage');
-          // Fallback: Keep loading overlay hidden anyway
-          setIsLoadingApp(false);
-        }
-      } else {
-        console.error('[Portal] Iframe failed to reach ready state');
-        setIsLoadingApp(false);
-      }
-    } else {
-      // For other apps, just hide loading overlay on load
-      setIsLoadingApp(false);
-    }
+  // Handler for iframe load
+  const handleIframeLoad = () => {
+    // Hide loading overlay on load
+    setIsLoadingApp(false);
   };
 
   return (
@@ -297,18 +250,17 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
 
         {/* MFE View */}
         {activeApp && (
-          <div className={`absolute inset-0 animate-mfe-enter flex flex-col ${(activeApp.id === 'carometro-alunos' || activeApp.id === 'carometro-funcionarios') ? 'p-0 bg-white' : 'p-1 md:p-8 bg-white'}`}>
-            <div className={`flex-1 w-full h-full border-none overflow-hidden ${(activeApp.id === 'carometro-alunos' || activeApp.id === 'carometro-funcionarios') ? 'bg-white' : 'bg-slate-50'}`}>
+          <div className={`absolute inset-0 animate-mfe-enter flex flex-col ${activeApp.id === 'carometro-alunos' ? 'p-0 bg-white' : 'p-1 md:p-8 bg-white'}`}>
+            <div className={`flex-1 w-full h-full border-none overflow-hidden ${activeApp.id === 'carometro-alunos' ? 'bg-white' : 'bg-slate-50'}`}>
               <iframe
-                ref={activeApp.id === 'carometro-funcionarios' ? carometroFuncIframeRef : null}
                 src={getAppUrl(activeApp)}
                 title={activeApp.title}
                 style={
-                  (activeApp.id === 'carometro-alunos' || activeApp.id === 'carometro-funcionarios')
+                  activeApp.id === 'carometro-alunos'
                     ? { width: '100%', height: '100%', border: 'none', borderRadius: '0' }
                     : { width: '100%', height: '100%', border: 'none' }
                 }
-                className={(activeApp.id !== 'carometro-alunos' && activeApp.id !== 'carometro-funcionarios') ? "w-full h-full border-none" : "w-full h-full border-none mx-auto block"}
+                className={activeApp.id !== 'carometro-alunos' ? "w-full h-full border-none" : "w-full h-full border-none mx-auto block"}
                 onLoad={handleIframeLoad}
               />
             </div>

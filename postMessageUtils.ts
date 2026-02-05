@@ -46,8 +46,6 @@ export type MFEMessage = MFEAuthSuccessMessage | MFEAuthFailureMessage | MFERead
 // Allowed origins for security validation
 const ALLOWED_MFE_ORIGINS = [
     'http://localhost:3001', // Local development - Carometro Alunos
-    'http://localhost:3002', // Local development - Carometro Funcionários
-    'https://carometro-funcionarios.vercel.app', // Production - Carometro Funcionários
     'https://carometro-alunos.vercel.app', // Production - Carometro Alunos (if exists)
 ];
 

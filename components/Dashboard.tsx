@@ -97,14 +97,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
 
   // PostMessage handler for MFE responses
   useEffect(() => {
+    // Existing MFE listener
     const messageListener = createMFEMessageListener(
       () => {
-        // On auth success, hide loading overlay
         console.log('[Portal] MFE authenticated successfully via PostMessage');
         setIsLoadingApp(false);
       },
       (error) => {
-        // On auth failure, log error but keep showing app
         console.error('[Portal] MFE authentication failed:', error);
         setIsLoadingApp(false);
       },
@@ -113,12 +112,42 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
       }
     );
 
+    // New Listener for Carômetro v2 specific protocol
+    const carometroListener = (event: MessageEvent) => {
+      const CAROMETRO_URL = import.meta.env.VITE_CAROMETRO_URL || "https://carometro-alunos-v2.vercel.app";
+
+      // Basic security check (flexible for dev/prod)
+      if (event.origin !== CAROMETRO_URL && import.meta.env.PROD) {
+        // console.warn("[Portal] Message from unknown origin:", event.origin);
+        // return; 
+      }
+
+      if (event.data?.type === 'CAROMETRO_READY') {
+        console.log("[Portal] Carômetro v2 is ready. Sending auth data...");
+
+        const frame = document.getElementById('carometro-frame') as HTMLIFrameElement;
+        if (frame && frame.contentWindow) {
+          frame.contentWindow.postMessage({
+            type: 'AUTH_USER',
+            payload: {
+              id_func: userId,
+              nome_func: userName,
+              email_func: userEmail,
+              tipo_usuario: userRole
+            }
+          }, '*'); // Using '*' to ensure delivery if origins mismatch slightly in dev, but code below uses CAROMETRO_URL variable if needed
+        }
+      }
+    };
+
     window.addEventListener('message', messageListener);
+    window.addEventListener('message', carometroListener);
 
     return () => {
       window.removeEventListener('message', messageListener);
+      window.removeEventListener('message', carometroListener);
     };
-  }, []);
+  }, [userId, userName, userEmail, userRole]);
 
   const handleOpenApp = (app: MFEConfig) => {
     setIsSettingsOpen(false);
@@ -147,7 +176,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
   // Helper to construct the correct URL for each app
   const getAppUrl = (app: MFEConfig) => {
     if (app.id === 'carometro-alunos') {
-      return `${import.meta.env.VITE_CAROMETRO_URL || app.url}/#/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`;
+      return `${import.meta.env.VITE_CAROMETRO_URL || app.url}/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`;
     }
 
     // Default for other apps
@@ -253,11 +282,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
           <div className={`absolute inset-0 animate-mfe-enter flex flex-col ${activeApp.id === 'carometro-alunos' ? 'p-0 bg-white' : 'p-1 md:p-8 bg-white'}`}>
             <div className={`flex-1 w-full h-full border-none overflow-hidden ${activeApp.id === 'carometro-alunos' ? 'bg-white' : 'bg-slate-50'}`}>
               <iframe
+                id={activeApp.id === 'carometro-alunos' ? "carometro-frame" : undefined}
                 src={getAppUrl(activeApp)}
                 title={activeApp.title}
                 style={
                   activeApp.id === 'carometro-alunos'
-                    ? { width: '100%', height: '100%', border: 'none', borderRadius: '0' }
+                    ? { width: '100%', height: '100%', border: 'none' }
                     : { width: '100%', height: '100%', border: 'none' }
                 }
                 className={activeApp.id !== 'carometro-alunos' ? "w-full h-full border-none" : "w-full h-full border-none mx-auto block"}

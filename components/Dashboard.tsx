@@ -76,7 +76,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
       id: 'carometro-alunos',
       title: "Carometro dos Alunos",
       bgColor: "bg-[#2563eb]",
-      url: import.meta.env.VITE_CAROMETRO_URL || "https://carometro-alunos-v2.vercel.app",
+      url: "https://carometro-alunos-v2.vercel.app",
       icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" /></svg>
     },
     {
@@ -114,19 +114,17 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
 
     // New Listener for Carômetro v2 specific protocol
     const carometroListener = (event: MessageEvent) => {
-      const CAROMETRO_URL = import.meta.env.VITE_CAROMETRO_URL || "https://carometro-alunos-v2.vercel.app";
+      const CAROMETRO_URL = "https://carometro-alunos-v2.vercel.app";
 
       // DEBUG: Log messages from expected origins
-      if (event.origin.includes('carometro') || event.origin.includes('localhost') || event.origin.includes('vercel.app')) {
+      if (event.origin === CAROMETRO_URL) {
         console.log("[Portal Debug] Message from " + event.origin + ":", event.data);
       }
 
-      // Basic security check (flexible for dev/prod)
-      // Allow messages from the specific Vercel URL even if not exactly matching env var in some cases
-      const allowedOrigins = [CAROMETRO_URL, "https://carometro-alunos-v2.vercel.app"];
-      if (!allowedOrigins.includes(event.origin) && !event.origin.includes('localhost') && import.meta.env.PROD) {
+      // Strict security check - only allow V2 production URL
+      if (event.origin !== CAROMETRO_URL) {
         // console.warn("[Portal] Message from unknown origin:", event.origin);
-        // return; 
+        return;
       }
 
       if (event.data?.type === 'CAROMETRO_READY') {
@@ -143,7 +141,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
               email_func: userEmail,
               tipo_usuario: userRole
             }
-          }, '*');
+          }, CAROMETRO_URL); // Send only to trusted origin
         }
       }
     };

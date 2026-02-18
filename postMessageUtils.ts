@@ -44,10 +44,7 @@ export type PortalMessage = PortalAuthMessage | PortalReadyMessage;
 export type MFEMessage = MFEAuthSuccessMessage | MFEAuthFailureMessage | MFEReadyMessage;
 
 // Allowed origins for security validation
-const ALLOWED_MFE_ORIGINS = [
-    'http://localhost:3001', // Local development - Carometro Alunos
-    'https://carometro-alunos.vercel.app', // Production - Carometro Alunos (if exists)
-    'https://carometro-alunos-v2.vercel.app', // Production V2 - New Carometro
+'https://carometro-alunos-v2.vercel.app', // Production V2 - New Carometro
     'https://portal-tarsila.vercel.app' // Portal itself (to suppress self-message errors)
 ];
 

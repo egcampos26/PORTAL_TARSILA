@@ -116,6 +116,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
     const carometroListener = (event: MessageEvent) => {
       const CAROMETRO_URL = import.meta.env.VITE_CAROMETRO_URL || "https://carometro-alunos-v2.vercel.app";
 
+      // DEBUG: Log messages from expected origins
+      if (event.origin.includes('carometro') || event.origin.includes('localhost')) {
+        console.log("[Portal Debug] Message from " + event.origin + ":", event.data);
+      }
+
       // Basic security check (flexible for dev/prod)
       if (event.origin !== CAROMETRO_URL && import.meta.env.PROD) {
         // console.warn("[Portal] Message from unknown origin:", event.origin);
@@ -123,10 +128,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
       }
 
       if (event.data?.type === 'CAROMETRO_READY') {
-        console.log("[Portal] Carômetro v2 is ready. Sending auth data...");
+        console.log("[Portal] Carômetro v2 is ready (origin: " + event.origin + "). Sending auth data...");
 
         const frame = document.getElementById('carometro-frame') as HTMLIFrameElement;
         if (frame && frame.contentWindow) {
+          console.log("[Portal] Found frame, posting AUTH_USER...");
           frame.contentWindow.postMessage({
             type: 'AUTH_USER',
             payload: {

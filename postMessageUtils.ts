@@ -44,7 +44,8 @@ export type PortalMessage = PortalAuthMessage | PortalReadyMessage;
 export type MFEMessage = MFEAuthSuccessMessage | MFEAuthFailureMessage | MFEReadyMessage;
 
 // Allowed origins for security validation
-'https://carometro-alunos-v2.vercel.app', // Production V2 - New Carometro
+const ALLOWED_MFE_ORIGINS = [
+    'https://carometro-alunos-v2.vercel.app', // Production V2 - New Carometro
     'https://portal-tarsila.vercel.app' // Portal itself (to suppress self-message errors)
 ];
 

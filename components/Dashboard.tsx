@@ -182,7 +182,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
   // Helper to construct the correct URL for each app
   const getAppUrl = (app: MFEConfig) => {
     if (app.id === 'carometro-alunos') {
-      return `${import.meta.env.VITE_CAROMETRO_URL || app.url}/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`;
+      return `${app.url}/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`;
     }
 
     // Default for other apps

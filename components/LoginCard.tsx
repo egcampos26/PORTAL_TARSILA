@@ -1,6 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+import BiometricButton from './BiometricButton';
+import {
+  checkBiometricSupport,
+  getAnyLocalCredential,
+  authenticateWithBiometric,
+} from '../hooks/useBiometric';
 
 interface LoginCardProps {
   onLogin: (userData: any) => void;
@@ -13,7 +19,25 @@ const LoginCard: React.FC<LoginCardProps> = ({ onLogin, onRequirePasswordChange 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isBiometricLoading, setIsBiometricLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Biometria: disponível e credencial local cadastrada neste dispositivo
+  const [showBiometric, setShowBiometric] = useState(false);
+  const [localCred, setLocalCred] = useState<{ credentialId: string; id_func: string } | null>(null);
+
+  useEffect(() => {
+    const initBiometric = async () => {
+      const supported = await checkBiometricSupport();
+      if (!supported) return;
+      const cred = getAnyLocalCredential();
+      if (cred) {
+        setLocalCred(cred);
+        setShowBiometric(true);
+      }
+    };
+    initBiometric();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,8 +60,8 @@ const LoginCard: React.FC<LoginCardProps> = ({ onLogin, onRequirePasswordChange 
         console.log('Login response raw:', userRaw); // Debugging
 
         const user = {
-          user_id: userRaw.id_func,      // Changed from ID_Login to id_func
-          name: userRaw.nome_func,       // Changed from nome to nome_func
+          user_id: userRaw.id_func,
+          name: userRaw.nome_func,
           email: userRaw.email,
           username: userRaw.usuario,
           category: userRaw.categoria,
@@ -58,6 +82,22 @@ const LoginCard: React.FC<LoginCardProps> = ({ onLogin, onRequirePasswordChange 
       setError(`Erro ao conectar: ${err.message || 'Erro desconhecido'}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    if (!localCred) return;
+    setIsBiometricLoading(true);
+    setError(null);
+
+    const result = await authenticateWithBiometric(localCred.credentialId, localCred.id_func);
+
+    setIsBiometricLoading(false);
+
+    if (result.user) {
+      onLogin(result.user);
+    } else {
+      setError(result.error || 'Autenticação biométrica falhou. Tente sua senha.');
     }
   };
 
@@ -138,6 +178,18 @@ const LoginCard: React.FC<LoginCardProps> = ({ onLogin, onRequirePasswordChange 
         >
           {isLoading ? 'Verificando...' : 'Acessar Portal'}
         </button>
+
+        {/* Botão de biometria — exibido apenas se o dispositivo é compatível e tem credencial cadastrada */}
+        {showBiometric && (
+          <>
+            <div className="flex items-center gap-3 my-1">
+              <div className="flex-1 h-px bg-white/20" />
+              <span className="text-white/40 text-[10px] font-bold uppercase tracking-widest">ou</span>
+              <div className="flex-1 h-px bg-white/20" />
+            </div>
+            <BiometricButton onClick={handleBiometricLogin} isLoading={isBiometricLoading} />
+          </>
+        )}
 
         <p className="text-center text-white/40 text-[9px] font-bold uppercase tracking-widest mt-4">
           Acesso Restrito a Colaboradores

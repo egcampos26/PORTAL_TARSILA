@@ -63,6 +63,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
   const [isLoadingApp, setIsLoadingApp] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAltHeader, setIsAltHeader] = useState(false);
+  const [screenMode, setScreenMode] = useState<'desktop' | 'tablet' | 'smartphone'>('desktop');
+  const [isScreenMenuOpen, setIsScreenMenuOpen] = useState(false);
 
   const apps: MFEConfig[] = [
     {
@@ -165,7 +167,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
   const handleCloseApp = () => {
     setActiveApp(null);
     setIsSettingsOpen(false);
-    setIsAltHeader(false); // Revert to blue header when app closes
+    setIsAltHeader(false);
+    setScreenMode('desktop');
+    setIsScreenMenuOpen(false);
   };
 
   const handleOpenSettings = () => {
@@ -233,7 +237,97 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         <div className="hidden md:flex items-center gap-4 md:gap-6">
           <span className={`hidden sm:block text-[10px] font-bold uppercase tracking-widest transition-colors ${isAltHeader ? 'text-[#3b5998]/60' : 'text-white/60'}`}>{userEmail}</span>
 
-          {/* Manual theme toggle removed as requested */}
+          {/* ── Screen-size picker (only visible when an app is open) ── */}
+          {activeApp && (
+            <div className="relative">
+              <button
+                onClick={() => setIsScreenMenuOpen(v => !v)}
+                title="Testar tamanho de tela"
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all border ${isAltHeader
+                    ? 'text-[#3b5998] border-[#3b5998]/30 hover:bg-[#3b5998]/10'
+                    : 'text-white border-white/30 hover:bg-white/10'
+                  }`}
+              >
+                {/* Icon changes with mode */}
+                {screenMode === 'desktop' && (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="2" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 21h8M12 17v4" />
+                  </svg>
+                )}
+                {screenMode === 'tablet' && (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="4" y="2" width="16" height="20" rx="2" strokeWidth="2" />
+                    <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
+                  </svg>
+                )}
+                {screenMode === 'smartphone' && (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="7" y="2" width="10" height="20" rx="2" strokeWidth="2" />
+                    <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
+                  </svg>
+                )}
+                <span className="hidden lg:inline">
+                  {screenMode === 'desktop' ? 'Desktop' : screenMode === 'tablet' ? 'Tablet' : 'Mobile'}
+                </span>
+                <svg className={`w-3 h-3 transition-transform ${isScreenMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Dropdown */}
+              {isScreenMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-fade-in">
+                  {([
+                    {
+                      id: 'desktop', label: 'Desktop', sub: 'Largura total', icon: (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="2" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 21h8M12 17v4" />
+                        </svg>
+                      )
+                    },
+                    {
+                      id: 'tablet', label: 'Tablet', sub: '768 px', icon: (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <rect x="4" y="2" width="16" height="20" rx="2" strokeWidth="2" />
+                          <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
+                        </svg>
+                      )
+                    },
+                    {
+                      id: 'smartphone', label: 'Smartphone', sub: '375 px', icon: (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <rect x="7" y="2" width="10" height="20" rx="2" strokeWidth="2" />
+                          <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
+                        </svg>
+                      )
+                    },
+                  ] as const).map(opt => (
+                    <button
+                      key={opt.id}
+                      onClick={() => { setScreenMode(opt.id); setIsScreenMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${screenMode === opt.id
+                          ? 'bg-[#3b5998] text-white'
+                          : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                    >
+                      <span className={screenMode === opt.id ? 'text-white' : 'text-[#3b5998]'}>{opt.icon}</span>
+                      <div>
+                        <div className="text-[11px] font-black uppercase tracking-widest">{opt.label}</div>
+                        <div className={`text-[9px] font-bold uppercase tracking-widest ${screenMode === opt.id ? 'text-white/70' : 'text-slate-400'}`}>{opt.sub}</div>
+                      </div>
+                      {screenMode === opt.id && (
+                        <svg className="w-3 h-3 ml-auto" fill="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" stroke="white" fill="none" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <button onClick={handleOpenSettings} className={`p-2 rounded-lg transition-all ${isSettingsOpen ? (isAltHeader ? 'bg-[#3b5998] text-white shadow-md' : 'bg-white text-[#3b5998] shadow-md') : (isAltHeader ? 'text-[#3b5998] hover:bg-[#3b5998]/10' : 'text-white hover:bg-white/10')}`}>
             <svg className={`w-5 h-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -285,18 +379,40 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
 
         {/* MFE View */}
         {activeApp && (
-          <div className={`absolute inset-0 animate-mfe-enter flex flex-col ${activeApp.id === 'carometro-alunos' ? 'p-0 bg-white' : 'p-1 md:p-8 bg-white'}`}>
-            <div className={`flex-1 w-full h-full border-none overflow-hidden ${activeApp.id === 'carometro-alunos' ? 'bg-white' : 'bg-slate-50'}`}>
+          <div
+            className="absolute inset-0 animate-mfe-enter flex flex-col items-center overflow-auto"
+            style={{
+              background: screenMode === 'desktop' ? 'white' : '#e2e8f0',
+              padding: screenMode === 'desktop' ? '0' : '24px 24px 48px',
+            }}
+          >
+            {/* Device label badge */}
+            {screenMode !== 'desktop' && (
+              <div className="flex items-center gap-2 mb-3 px-4 py-1.5 bg-[#3b5998] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow">
+                {screenMode === 'tablet' ? (
+                  <><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" strokeWidth="2" /><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" /></svg> Tablet — 768 px</>
+                ) : (
+                  <><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2" strokeWidth="2" /><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" /></svg> Smartphone — 375 px</>
+                )}
+              </div>
+            )}
+
+            {/* iframe wrapper — width controlled by screenMode */}
+            <div
+              className="overflow-hidden shadow-2xl transition-all duration-500"
+              style={{
+                width: screenMode === 'desktop' ? '100%' : screenMode === 'tablet' ? '768px' : '375px',
+                height: screenMode === 'desktop' ? '100%' : 'calc(100vh - 180px)',
+                minHeight: screenMode === 'desktop' ? undefined : '500px',
+                borderRadius: screenMode === 'desktop' ? '0' : '1.5rem',
+                border: screenMode === 'desktop' ? 'none' : '8px solid #1e293b',
+              }}
+            >
               <iframe
-                id={activeApp.id === 'carometro-alunos' ? "carometro-frame" : undefined}
+                id={activeApp.id === 'carometro-alunos' ? 'carometro-frame' : undefined}
                 src={getAppUrl(activeApp)}
                 title={activeApp.title}
-                style={
-                  activeApp.id === 'carometro-alunos'
-                    ? { width: '100%', height: '100%', border: 'none' }
-                    : { width: '100%', height: '100%', border: 'none' }
-                }
-                className={activeApp.id !== 'carometro-alunos' ? "w-full h-full border-none" : "w-full h-full border-none mx-auto block"}
+                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
                 onLoad={handleIframeLoad}
               />
             </div>

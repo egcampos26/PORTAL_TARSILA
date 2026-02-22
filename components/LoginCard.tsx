@@ -64,7 +64,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ onLogin, onRequirePasswordChange 
           name: userRaw.nome_func,
           email: userRaw.email,
           username: userRaw.usuario,
-          category: userRaw.categoria,
+          category: userRaw.tipo_usuario || userRaw.categoria || 'usuario',
           visual_id: userRaw.identificacao_visual,
           needs_password_change: !!userRaw.needs_password_change
         };

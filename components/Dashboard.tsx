@@ -240,8 +240,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         )}
 
         {!activeApp && !isLoadingApp && !isSettingsOpen && (
-          <div className="w-full max-w-5xl mx-auto flex flex-col items-end gap-6 animate-fade-in px-4 md:px-12">
-            <div className="flex flex-wrap justify-end gap-4 md:gap-8 w-full mb-2">
+          <div className="w-full flex flex-col items-start gap-6 animate-fade-in px-4 md:pl-[12%] lg:pl-[15%] mt-8 md:mt-[10vh]">
+            <div className="flex flex-wrap justify-start gap-4 md:gap-6 w-full max-w-4xl mb-2">
               {apps.map((app) => (
                 <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[320px]">
                   <AppTile title={app.title} icon={app.icon} iconColor={app.bgColor} onClick={() => handleOpenApp(app)} />

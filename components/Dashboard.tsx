@@ -276,13 +276,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         )}
 
         {activeApp && (
-          <div className="w-full flex-1 flex flex-col animate-fade-in mt-2">
-            <div className="w-full flex-1 bg-white rounded-t-3xl overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 flex flex-col items-center animate-fade-in bg-slate-900/50 backdrop-blur-md pt-4">
+            <div className="w-full h-full bg-white rounded-t-[2rem] overflow-hidden shadow-2xl flex flex-col">
                <iframe
                 id={activeApp.id === 'carometro-alunos' ? 'carometro-frame' : undefined}
                 src={getAppUrl(activeApp)}
                 title={activeApp.title}
-                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                style={{ width: '100%', height: '100%', flex: '1', border: 'none', display: 'block' }}
                 onLoad={handleIframeLoad}
               />
             </div>

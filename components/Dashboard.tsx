@@ -24,7 +24,7 @@ const AppTile: React.FC<AppTileProps> = ({ title, icon, iconColor, onClick, isNe
     return (
       <button
         onClick={onClick}
-        className="group relative flex flex-col items-center justify-center gap-4 w-full aspect-square md:w-56 md:h-56 backdrop-blur-md bg-white/5 border-2 border-white/20 rounded-3xl hover:bg-white/10 hover:border-white/40 transition-all duration-300 active:scale-95 shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
+        className="group relative flex flex-col items-center justify-center gap-6 w-full aspect-square md:w-72 md:h-72 backdrop-blur-md bg-white/5 border-2 border-white/20 rounded-[2rem] hover:bg-white/10 hover:border-white/40 transition-all duration-300 active:scale-95 shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
       >
         <div className="text-white/50 group-hover:text-white/80 transition-colors">
           <svg className="w-16 h-16 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,10 +41,10 @@ const AppTile: React.FC<AppTileProps> = ({ title, icon, iconColor, onClick, isNe
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col items-center justify-center gap-6 w-full aspect-square md:w-56 md:h-56 backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-2 active:scale-95 relative overflow-hidden"
+      className="group flex flex-col items-center justify-center gap-8 w-full aspect-square md:w-72 md:h-72 backdrop-blur-md bg-white/10 border border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-2 active:scale-95 relative overflow-hidden"
     >
       <div className={`absolute inset-0 opacity-10 ${iconColor} group-hover:opacity-20 transition-opacity`}></div>
-      <div className={`relative z-10 w-20 h-20 flex items-center justify-center text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] group-hover:scale-110 transition-transform duration-300`}>
+      <div className={`relative z-10 w-28 h-28 flex items-center justify-center text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] group-hover:scale-110 transition-transform duration-300`}>
         {icon}
       </div>
       <span className="relative z-10 text-[12px] md:text-[14px] font-bold text-white uppercase tracking-[0.1em] text-center px-4 leading-tight drop-shadow-md">
@@ -60,6 +60,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [screenMode, setScreenMode] = useState<'desktop' | 'tablet' | 'smartphone'>('desktop');
   const [isScreenMenuOpen, setIsScreenMenuOpen] = useState(false);
+  const [bgOpacity, setBgOpacity] = useState(40);
 
   const apps: MFEConfig[] = [
     {
@@ -177,7 +178,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000"
         style={{ backgroundImage: "url('/fachada.png')" }}
       >
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+        <div 
+          className="absolute inset-0 backdrop-blur-[2px] transition-colors duration-200"
+          style={{ backgroundColor: `rgba(0, 0, 0, ${bgOpacity / 100})` }}
+        ></div>
       </div>
 
       <header className="relative z-50 px-6 md:px-12 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -201,6 +205,18 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         </div>
 
         <div className="flex items-center gap-4 md:gap-6 self-end md:self-auto">
+          <div className="hidden lg:flex items-center gap-2 mr-4 bg-black/20 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
+            <span className="text-[9px] text-white/70 font-bold uppercase tracking-widest">Fundo:</span>
+            <input 
+              type="range" 
+              min="0" max="100" 
+              value={bgOpacity} 
+              onChange={(e) => setBgOpacity(Number(e.target.value))}
+              className="w-24 accent-white cursor-pointer"
+            />
+            <span className="text-[9px] text-white font-bold w-6 text-right">{bgOpacity}%</span>
+          </div>
+
           <span className="hidden sm:block text-[10px] md:text-xs font-bold text-white/80 uppercase tracking-widest drop-shadow-md">
             {userEmail}
           </span>
@@ -227,7 +243,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
           <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-6 animate-fade-in">
             <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full mb-2">
               {apps.slice(0, 3).map((app) => (
-                <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[240px]">
+                <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[320px]">
                   <AppTile title={app.title} icon={app.icon} iconColor={app.bgColor} onClick={() => handleOpenApp(app)} />
                 </div>
               ))}
@@ -235,11 +251,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
             
             <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full">
               {apps.slice(3).map((app) => (
-                <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[240px]">
+                <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[320px]">
                   <AppTile title={app.title} icon={app.icon} iconColor={app.bgColor} onClick={() => handleOpenApp(app)} />
                 </div>
               ))}
-              <div className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[240px]">
+              <div className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[320px]">
                 <AppTile title="Novo App" iconColor="" icon={null} isNew={true} onClick={() => alert("Gerenciador de MFE")} />
               </div>
             </div>

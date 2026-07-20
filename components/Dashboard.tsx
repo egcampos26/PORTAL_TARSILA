@@ -161,9 +161,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
 
   const getAppUrl = (app: MFEConfig) => {
     if (app.id === 'carometro-alunos') {
-      return \`\${app.url}/?user_name=\${encodeURIComponent(userName)}&user_role=\${encodeURIComponent(userRole)}&prod=true\`;
+      return `${app.url}/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`;
     }
-    return \`\${app.url}?user=\${encodeURIComponent(userName)}&email=\${encodeURIComponent(userEmail)}\`;
+    return `${app.url}?user=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
   };
 
   const handleIframeLoad = () => {

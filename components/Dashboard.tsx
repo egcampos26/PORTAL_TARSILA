@@ -24,16 +24,16 @@ const AppTile: React.FC<AppTileProps> = ({ title, icon, iconColor, onClick, isNe
     return (
       <button
         onClick={onClick}
-        className="group relative flex flex-col items-center justify-center gap-6 w-full aspect-square md:w-72 md:h-72 backdrop-blur-md bg-white/5 border-2 border-white/20 rounded-[2rem] hover:bg-white/10 hover:border-white/40 transition-all duration-300 active:scale-95 shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
+        className="group relative flex flex-col items-center justify-between py-6 sm:py-8 w-full aspect-square md:w-72 md:h-72 backdrop-blur-md bg-white/5 border-2 border-white/20 rounded-2xl md:rounded-[2rem] hover:bg-white/10 hover:border-white/40 transition-all duration-300 active:scale-95 shadow-[0_8px_32px_rgba(0,0,0,0.1)] p-4"
       >
-        <div className="text-white/50 group-hover:text-white/80 transition-colors">
-          <svg className="w-16 h-16 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        </div>
-        <span className="text-[12px] font-bold text-white uppercase tracking-widest text-center mt-2 group-hover:text-white transition-colors">
+        <span className="text-[10px] sm:text-[12px] font-bold text-white uppercase tracking-widest text-center group-hover:text-white transition-colors px-2 drop-shadow-md">
           {title}
         </span>
+        <div className="text-white/50 group-hover:text-white transition-colors drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+          <svg className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
       </button>
     );
   }
@@ -41,15 +41,15 @@ const AppTile: React.FC<AppTileProps> = ({ title, icon, iconColor, onClick, isNe
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col items-center justify-center gap-8 w-full aspect-square md:w-72 md:h-72 backdrop-blur-md bg-white/10 border border-white/20 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-2 active:scale-95 relative overflow-hidden"
+      className="group flex flex-col items-center justify-between py-6 sm:py-8 md:py-12 w-full aspect-square md:w-72 md:h-72 backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl md:rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-2 active:scale-95 relative overflow-hidden p-2 sm:p-4"
     >
       <div className={`absolute inset-0 opacity-10 ${iconColor} group-hover:opacity-20 transition-opacity`}></div>
-      <div className={`relative z-10 w-28 h-28 flex items-center justify-center text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] group-hover:scale-110 transition-transform duration-300`}>
-        {icon}
-      </div>
-      <span className="relative z-10 text-[12px] md:text-[14px] font-bold text-white uppercase tracking-[0.1em] text-center px-4 leading-tight drop-shadow-md">
+      <span className="relative z-10 text-[9px] sm:text-[11px] md:text-[14px] font-bold text-white uppercase tracking-[0.1em] text-center px-1 sm:px-4 leading-tight drop-shadow-md">
         {title}
       </span>
+      <div className={`relative z-10 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)] group-hover:scale-110 transition-transform duration-300`}>
+        {icon}
+      </div>
     </button>
   );
 };
@@ -240,17 +240,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         )}
 
         {!activeApp && !isLoadingApp && !isSettingsOpen && (
-          <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-6 animate-fade-in">
-            <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full mb-2">
-              {apps.slice(0, 3).map((app) => (
-                <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[320px]">
-                  <AppTile title={app.title} icon={app.icon} iconColor={app.bgColor} onClick={() => handleOpenApp(app)} />
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full">
-              {apps.slice(3).map((app) => (
+          <div className="w-full max-w-5xl mx-auto flex flex-col items-center gap-6 animate-fade-in px-2">
+            <div className="flex flex-wrap justify-center gap-4 md:gap-8 w-full mb-2">
+              {apps.map((app) => (
                 <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[320px]">
                   <AppTile title={app.title} icon={app.icon} iconColor={app.bgColor} onClick={() => handleOpenApp(app)} />
                 </div>

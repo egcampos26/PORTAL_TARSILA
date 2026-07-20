@@ -276,8 +276,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         )}
 
         {activeApp && (
-          <div className="absolute inset-0 flex flex-col items-center animate-fade-in px-0 md:px-4 pb-2 md:pb-4 pt-0">
-            <div className="w-full h-full bg-white rounded-b-2xl md:rounded-[2rem] md:rounded-t-none overflow-hidden shadow-2xl flex flex-col">
+          <div className="absolute inset-0 flex flex-col items-center animate-fade-in px-0 md:px-4">
+            <div className="w-full h-full bg-white rounded-2xl md:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col">
                <iframe
                 id={activeApp.id === 'carometro-alunos' ? 'carometro-frame' : undefined}
                 src={getAppUrl(activeApp)}

@@ -231,7 +231,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         </div>
       </header>
 
-      <main className="flex-1 relative z-10 flex flex-col items-center justify-center p-4">
+      <main className={`flex-1 relative z-10 flex flex-col items-center p-4 ${(!activeApp && !isLoadingApp && !isSettingsOpen) ? 'justify-center' : 'justify-start'}`}>
         {isLoadingApp && (
           <div className="absolute inset-0 bg-black/50 backdrop-blur-md flex flex-col items-center justify-center z-40">
             <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -276,9 +276,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         )}
 
         {activeApp && (
-          <div className="w-full h-full max-h-[85vh] flex flex-col items-center animate-fade-in">
-            {/* Aqui manter a lógica do iframe igual antes, mas estilizada pro novo layout se desejar */}
-            <div className="w-full h-full bg-white rounded-t-3xl overflow-hidden shadow-2xl">
+          <div className="w-full flex-1 flex flex-col animate-fade-in mt-2">
+            <div className="w-full flex-1 bg-white rounded-t-3xl overflow-hidden shadow-2xl">
                <iframe
                 id={activeApp.id === 'carometro-alunos' ? 'carometro-frame' : undefined}
                 src={getAppUrl(activeApp)}

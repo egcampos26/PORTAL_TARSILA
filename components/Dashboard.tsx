@@ -1,11 +1,6 @@
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MFEConfig } from '../types';
-import {
-  sendAuthDataToMFE,
-  createMFEMessageListener,
-  waitForIframeReady
-} from '../postMessageUtils';
+import { createMFEMessageListener } from '../postMessageUtils';
 
 interface DashboardProps {
   userId: string;
@@ -19,23 +14,25 @@ interface DashboardProps {
 interface AppTileProps {
   title: string;
   icon: React.ReactNode;
-  bgColor: string;
+  iconColor: string;
   onClick?: () => void;
   isNew?: boolean;
 }
 
-const AppTile: React.FC<AppTileProps> = ({ title, icon, bgColor, onClick, isNew }) => {
+const AppTile: React.FC<AppTileProps> = ({ title, icon, iconColor, onClick, isNew }) => {
   if (isNew) {
     return (
       <button
         onClick={onClick}
-        className="group relative flex flex-col items-center justify-center gap-4 w-full aspect-square border-2 border-dashed border-slate-200 rounded-[2.5rem] hover:border-blue-300 hover:bg-blue-50/30 transition-all duration-300 active:scale-95"
+        className="group relative flex flex-col items-center justify-center gap-4 w-full aspect-square md:w-56 md:h-56 backdrop-blur-md bg-white/5 border-2 border-white/20 rounded-3xl hover:bg-white/10 hover:border-white/40 transition-all duration-300 active:scale-95 shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
       >
-        <div className="w-12 h-12 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 group-hover:text-blue-400 group-hover:border-blue-300 transition-colors">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+        <div className="text-white/50 group-hover:text-white/80 transition-colors">
+          <svg className="w-16 h-16 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
         </div>
-        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em] group-hover:text-blue-400 transition-colors">
-          Novo App
+        <span className="text-[12px] font-bold text-white uppercase tracking-widest text-center mt-2 group-hover:text-white transition-colors">
+          {title}
         </span>
       </button>
     );
@@ -44,14 +41,13 @@ const AppTile: React.FC<AppTileProps> = ({ title, icon, bgColor, onClick, isNew 
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col items-center justify-center gap-6 w-full aspect-square bg-white rounded-[2.5rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-1 active:scale-95"
+      className="group flex flex-col items-center justify-center gap-6 w-full aspect-square md:w-56 md:h-56 backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:-translate-y-2 active:scale-95 relative overflow-hidden"
     >
-      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-[1.8rem] ${bgColor} flex items-center justify-center text-white shadow-lg shadow-inherit group-hover:scale-110 transition-transform duration-300`}>
-        <div className="w-8 h-8 md:w-10 md:h-10">
-          {icon}
-        </div>
+      <div className={`absolute inset-0 opacity-10 ${iconColor} group-hover:opacity-20 transition-opacity`}></div>
+      <div className={`relative z-10 w-20 h-20 flex items-center justify-center text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] group-hover:scale-110 transition-transform duration-300`}>
+        {icon}
       </div>
-      <span className="text-[10px] md:text-[11px] font-black text-slate-700 uppercase tracking-widest text-center px-4 leading-tight">
+      <span className="relative z-10 text-[12px] md:text-[14px] font-bold text-white uppercase tracking-[0.1em] text-center px-4 leading-tight drop-shadow-md">
         {title}
       </span>
     </button>
@@ -62,7 +58,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
   const [activeApp, setActiveApp] = useState<MFEConfig | null>(null);
   const [isLoadingApp, setIsLoadingApp] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isAltHeader, setIsAltHeader] = useState(false);
   const [screenMode, setScreenMode] = useState<'desktop' | 'tablet' | 'smartphone'>('desktop');
   const [isScreenMenuOpen, setIsScreenMenuOpen] = useState(false);
 
@@ -76,7 +71,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
     },
     {
       id: 'carometro-alunos',
-      title: "Carometro dos Alunos",
+      title: "Carômetro dos Alunos",
       bgColor: "bg-[#2563eb]",
       url: "https://carometro-alunos-v2.vercel.app",
       icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" /></svg>
@@ -97,12 +92,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
     },
   ];
 
-  // PostMessage handler for MFE responses
   useEffect(() => {
-    // Existing MFE listener
     const messageListener = createMFEMessageListener(
       () => {
-        console.log('[Portal] MFE authenticated successfully via PostMessage');
         setIsLoadingApp(false);
       },
       (error) => {
@@ -110,31 +102,17 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         setIsLoadingApp(false);
       },
       () => {
-        console.log('[Portal] MFE is ready to receive messages');
+        // Ready
       }
     );
 
-    // New Listener for Carômetro v2 specific protocol
     const carometroListener = (event: MessageEvent) => {
       const CAROMETRO_URL = "https://carometro-alunos-v2.vercel.app";
-
-      // DEBUG: Log messages from expected origins
-      if (event.origin === CAROMETRO_URL) {
-        console.log("[Portal Debug] Message from " + event.origin + ":", event.data);
-      }
-
-      // Strict security check - only allow V2 production URL
-      if (event.origin !== CAROMETRO_URL) {
-        // console.warn("[Portal] Message from unknown origin:", event.origin);
-        return;
-      }
+      if (event.origin !== CAROMETRO_URL) return;
 
       if (event.data?.type === 'CAROMETRO_READY') {
-        console.log("[Portal] Carômetro v2 is ready (origin: " + event.origin + "). Sending auth data...");
-
         const frame = document.getElementById('carometro-frame') as HTMLIFrameElement;
         if (frame && frame.contentWindow) {
-          console.log("[Portal] Found frame, posting AUTH_USER...");
           frame.contentWindow.postMessage({
             type: 'AUTH_USER',
             payload: {
@@ -143,7 +121,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
               email_func: userEmail,
               tipo_usuario: userRole
             }
-          }, CAROMETRO_URL); // Send only to trusted origin
+          }, CAROMETRO_URL);
         }
       }
     };
@@ -161,13 +139,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
     setIsSettingsOpen(false);
     setIsLoadingApp(true);
     setActiveApp(app);
-    setIsAltHeader(true); // Auto-switch to white header when app opens
   };
 
   const handleCloseApp = () => {
     setActiveApp(null);
     setIsSettingsOpen(false);
-    setIsAltHeader(false);
     setScreenMode('desktop');
     setIsScreenMenuOpen(false);
   };
@@ -183,232 +159,111 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
 
   const greeting = userGender === 'F' ? 'SEJA BEM-VINDA' : 'SEJA BEM-VINDO';
 
-  // Helper to construct the correct URL for each app
   const getAppUrl = (app: MFEConfig) => {
     if (app.id === 'carometro-alunos') {
-      return `${app.url}/?user_name=${encodeURIComponent(userName)}&user_role=${encodeURIComponent(userRole)}&prod=true`;
+      return \`\${app.url}/?user_name=\${encodeURIComponent(userName)}&user_role=\${encodeURIComponent(userRole)}&prod=true\`;
     }
-
-    // Default for other apps
-    return `${app.url}?user=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
+    return \`\${app.url}?user=\${encodeURIComponent(userName)}&email=\${encodeURIComponent(userEmail)}\`;
   };
 
-  // Handler for iframe load
   const handleIframeLoad = () => {
-    // Hide loading overlay on load
     setIsLoadingApp(false);
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col">
-      <header className={`${isAltHeader ? 'bg-white border-b border-slate-200' : 'bg-[#3b5998] shadow-lg'} px-4 md:px-12 py-3 md:py-5 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-4 z-50 transition-all duration-500`}>
-        <div className="flex flex-col md:flex-row items-center gap-1 md:gap-8 w-full md:w-auto">
-          <div className="flex items-center justify-between w-full md:w-auto gap-3">
-            <button
-              onClick={handleCloseApp}
-              className={`transition-all flex items-center gap-2 ${(activeApp || isSettingsOpen) ? 'opacity-100' : 'opacity-0 pointer-events-none w-0 overflow-hidden'}`}
-            >
-              <div className={`w-8 h-8 rounded-full ${isAltHeader ? 'bg-[#3b5998]/10 text-[#3b5998] hover:bg-[#3b5998]/20' : 'bg-white/20 text-white hover:bg-white/40'} flex items-center justify-center transition-colors`}>
+    <div className="min-h-screen flex flex-col relative bg-slate-900 overflow-hidden font-sans">
+      {/* Imagem de Fundo (Fachada) com sobreposição */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000"
+        style={{ backgroundImage: "url('/fachada.png')" }}
+      >
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+      </div>
+
+      <header className="relative z-50 px-6 md:px-12 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            {activeApp && (
+              <button
+                onClick={handleCloseApp}
+                className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/40 transition-colors"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-              </div>
-            </button>
-            <h1
-              className={`${isAltHeader ? 'text-[#3b5998]' : 'text-white'} font-black text-xs sm:text-sm md:text-lg uppercase tracking-[0.1em] md:tracking-[0.2em] cursor-pointer truncate transition-colors`}
-              onClick={handleCloseApp}
-            >
+              </button>
+            )}
+            <h1 className="text-white font-black text-sm md:text-xl uppercase tracking-widest drop-shadow-md">
               PORTAL EMEF TARSILA DO AMARAL
             </h1>
-            {/* Manual theme toggle removed as requested */}
-            <div className="md:hidden flex items-center gap-2">
-              <button onClick={handleOpenSettings} className={`p-1.5 rounded-lg transition-all ${isSettingsOpen ? (isAltHeader ? 'bg-[#3b5998] text-white shadow-md' : 'bg-white text-[#3b5998] shadow-md') : (isAltHeader ? 'text-[#3b5998] hover:bg-[#3b5998]/10' : 'text-white hover:bg-white/10')}`}>
-                <svg className={`w-4 h-4 ${isSettingsOpen ? 'animate-spin-slow' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              </button>
-              <button onClick={onLogout} className={`p-1.5 rounded-lg border transition-all active:scale-95 ${isAltHeader ? 'text-[#3b5998] border-[#3b5998]/30 hover:bg-[#3b5998] hover:text-white' : 'text-white border-white/30 hover:bg-white hover:text-[#3b5998]'}`}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-              </button>
-            </div>
           </div>
-          <div className={`hidden md:block w-px h-6 transition-colors ${isAltHeader ? 'bg-[#3b5998]/20' : 'bg-white/20'}`}></div>
-          <span className={`font-bold text-[10px] sm:text-xs md:text-base uppercase tracking-widest whitespace-nowrap opacity-80 md:opacity-100 transition-colors ${isAltHeader ? 'text-[#3b5998]/90' : 'text-white/90'}`}>
-            {greeting}, <span className={isAltHeader ? 'text-[#3b5998]' : 'text-white'}>{userName}</span>
+          <span className="text-white/80 font-bold text-[10px] md:text-xs uppercase tracking-widest pl-0 md:pl-11 drop-shadow-md">
+            {greeting}, <span className="text-white">{userName}</span>
           </span>
         </div>
 
-        <div className="hidden md:flex items-center gap-4 md:gap-6">
-          <span className={`hidden sm:block text-[10px] font-bold uppercase tracking-widest transition-colors ${isAltHeader ? 'text-[#3b5998]/60' : 'text-white/60'}`}>{userEmail}</span>
+        <div className="flex items-center gap-4 md:gap-6 self-end md:self-auto">
+          <span className="hidden sm:block text-[10px] md:text-xs font-bold text-white/80 uppercase tracking-widest drop-shadow-md">
+            {userEmail}
+          </span>
 
-          {/* ── Screen-size picker (only visible when an app is open) ── */}
-          {activeApp && (
-            <div className="relative">
-              <button
-                onClick={() => setIsScreenMenuOpen(v => !v)}
-                title="Testar tamanho de tela"
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all border ${isAltHeader
-                    ? 'text-[#3b5998] border-[#3b5998]/30 hover:bg-[#3b5998]/10'
-                    : 'text-white border-white/30 hover:bg-white/10'
-                  }`}
-              >
-                {/* Icon changes with mode */}
-                {screenMode === 'desktop' && (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="2" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 21h8M12 17v4" />
-                  </svg>
-                )}
-                {screenMode === 'tablet' && (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="4" y="2" width="16" height="20" rx="2" strokeWidth="2" />
-                    <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
-                  </svg>
-                )}
-                {screenMode === 'smartphone' && (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="7" y="2" width="10" height="20" rx="2" strokeWidth="2" />
-                    <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
-                  </svg>
-                )}
-                <span className="hidden lg:inline">
-                  {screenMode === 'desktop' ? 'Desktop' : screenMode === 'tablet' ? 'Tablet' : 'Mobile'}
-                </span>
-                <svg className={`w-3 h-3 transition-transform ${isScreenMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Dropdown */}
-              {isScreenMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-fade-in">
-                  {([
-                    {
-                      id: 'desktop', label: 'Desktop', sub: 'Largura total', icon: (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="2" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 21h8M12 17v4" />
-                        </svg>
-                      )
-                    },
-                    {
-                      id: 'tablet', label: 'Tablet', sub: '768 px', icon: (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <rect x="4" y="2" width="16" height="20" rx="2" strokeWidth="2" />
-                          <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
-                        </svg>
-                      )
-                    },
-                    {
-                      id: 'smartphone', label: 'Smartphone', sub: '375 px', icon: (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <rect x="7" y="2" width="10" height="20" rx="2" strokeWidth="2" />
-                          <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
-                        </svg>
-                      )
-                    },
-                  ] as const).map(opt => (
-                    <button
-                      key={opt.id}
-                      onClick={() => { setScreenMode(opt.id); setIsScreenMenuOpen(false); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${screenMode === opt.id
-                          ? 'bg-[#3b5998] text-white'
-                          : 'text-slate-700 hover:bg-slate-50'
-                        }`}
-                    >
-                      <span className={screenMode === opt.id ? 'text-white' : 'text-[#3b5998]'}>{opt.icon}</span>
-                      <div>
-                        <div className="text-[11px] font-black uppercase tracking-widest">{opt.label}</div>
-                        <div className={`text-[9px] font-bold uppercase tracking-widest ${screenMode === opt.id ? 'text-white/70' : 'text-slate-400'}`}>{opt.sub}</div>
-                      </div>
-                      {screenMode === opt.id && (
-                        <svg className="w-3 h-3 ml-auto" fill="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" stroke="white" fill="none" />
-                        </svg>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <button onClick={handleOpenSettings} className={`p-2 rounded-lg transition-all ${isSettingsOpen ? (isAltHeader ? 'bg-[#3b5998] text-white shadow-md' : 'bg-white text-[#3b5998] shadow-md') : (isAltHeader ? 'text-[#3b5998] hover:bg-[#3b5998]/10' : 'text-white hover:bg-white/10')}`}>
-            <svg className={`w-5 h-5 ${isSettingsOpen ? 'animate-spin-slow' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          <button onClick={handleOpenSettings} className="p-2 text-white/80 hover:text-white transition-colors">
+            <svg className="w-5 h-5 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           </button>
-          <button onClick={onLogout} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all active:scale-95 border ${isAltHeader ? 'text-[#3b5998] border-[#3b5998]/30 hover:bg-[#3b5998] hover:text-white' : 'text-white border-white/30 hover:bg-white hover:text-[#3b5998]'}`}>
-            Sair <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          
+          <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/30 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors backdrop-blur-sm">
+            SAIR <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           </button>
         </div>
       </header>
 
-      <main className="flex-1 relative overflow-hidden">
-        {/* Loading Overlay */}
+      <main className="flex-1 relative z-10 flex flex-col items-center justify-center p-4">
         {isLoadingApp && (
-          <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-sm flex flex-col items-center justify-center z-40 animate-fade-in">
-            <div className="w-16 h-16 border-4 border-[#3b5998] border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-[10px] font-black text-[#3b5998] uppercase tracking-[0.3em]">Abrindo Aplicativo...</p>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-md flex flex-col items-center justify-center z-40">
+            <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-[12px] font-black text-white uppercase tracking-[0.3em] drop-shadow-lg">Abrindo Aplicativo...</p>
           </div>
         )}
 
-        {/* Dashboard View */}
         {!activeApp && !isLoadingApp && !isSettingsOpen && (
-          <div className="max-w-7xl mx-auto w-full px-8 md:px-16 py-16 animate-fade-in-tiles">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-              {apps.map((app) => (
-                <AppTile key={app.id} title={app.title} icon={app.icon} bgColor={app.bgColor} onClick={() => handleOpenApp(app)} />
-              ))}
-              <AppTile title="Novo App" bgColor="" icon={null} isNew={true} onClick={() => alert("Gerenciador de MFE")} />
-            </div>
-          </div>
-        )}
-
-        {/* User Settings */}
-        {isSettingsOpen && (
-          <div className="absolute inset-0 bg-slate-50 overflow-auto animate-mfe-enter">
-            <div className="max-w-3xl mx-auto px-6 py-12">
-              <div className="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-slate-100 p-12">
-                <h2 className="text-3xl font-black text-slate-800 uppercase tracking-tighter mb-4">{userName}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">E-mail</label>
-                    <div className="bg-slate-50 p-4 rounded-2xl font-bold">{userEmail}</div>
-                  </div>
+          <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-6 animate-fade-in">
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full mb-2">
+              {apps.slice(0, 3).map((app) => (
+                <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[240px]">
+                  <AppTile title={app.title} icon={app.icon} iconColor={app.bgColor} onClick={() => handleOpenApp(app)} />
                 </div>
-                <button onClick={handleCloseApp} className="mt-8 text-[#3b5998] font-black text-[10px] uppercase tracking-widest">Voltar</button>
+              ))}
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6 w-full">
+              {apps.slice(3).map((app) => (
+                <div key={app.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[240px]">
+                  <AppTile title={app.title} icon={app.icon} iconColor={app.bgColor} onClick={() => handleOpenApp(app)} />
+                </div>
+              ))}
+              <div className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-1rem)] max-w-[240px]">
+                <AppTile title="Novo App" iconColor="" icon={null} isNew={true} onClick={() => alert("Gerenciador de MFE")} />
               </div>
             </div>
           </div>
         )}
 
-        {/* MFE View */}
-        {activeApp && (
-          <div
-            className="absolute inset-0 animate-mfe-enter flex flex-col items-center overflow-auto"
-            style={{
-              background: screenMode === 'desktop' ? 'white' : '#e2e8f0',
-              padding: screenMode === 'desktop' ? '0' : '24px 24px 48px',
-            }}
-          >
-            {/* Device label badge */}
-            {screenMode !== 'desktop' && (
-              <div className="flex items-center gap-2 mb-3 px-4 py-1.5 bg-[#3b5998] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow">
-                {screenMode === 'tablet' ? (
-                  <><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" strokeWidth="2" /><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" /></svg> Tablet — 768 px</>
-                ) : (
-                  <><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2" strokeWidth="2" /><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" /></svg> Smartphone — 375 px</>
-                )}
+        {isSettingsOpen && (
+          <div className="w-full max-w-3xl mx-auto backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-12 text-white shadow-2xl animate-fade-in">
+            <h2 className="text-3xl font-black uppercase tracking-tighter mb-4 drop-shadow-md">{userName}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-[10px] text-white/60 font-black uppercase tracking-widest mb-2">E-mail</label>
+                <div className="bg-black/20 p-4 rounded-2xl font-bold border border-white/10">{userEmail}</div>
               </div>
-            )}
+            </div>
+            <button onClick={handleCloseApp} className="mt-8 px-6 py-3 bg-white text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors">Voltar</button>
+          </div>
+        )}
 
-            {/* iframe wrapper — width controlled by screenMode */}
-            <div
-              className="overflow-hidden shadow-2xl transition-all duration-500"
-              style={{
-                width: screenMode === 'desktop' ? '100%' : screenMode === 'tablet' ? '768px' : '375px',
-                height: screenMode === 'desktop' ? '100%' : 'calc(100vh - 180px)',
-                minHeight: screenMode === 'desktop' ? undefined : '500px',
-                borderRadius: screenMode === 'desktop' ? '0' : '1.5rem',
-                border: screenMode === 'desktop' ? 'none' : '8px solid #1e293b',
-              }}
-            >
-              <iframe
+        {activeApp && (
+          <div className="w-full h-full max-h-[85vh] flex flex-col items-center animate-fade-in">
+            {/* Aqui manter a lógica do iframe igual antes, mas estilizada pro novo layout se desejar */}
+            <div className="w-full h-full bg-white rounded-t-3xl overflow-hidden shadow-2xl">
+               <iframe
                 id={activeApp.id === 'carometro-alunos' ? 'carometro-frame' : undefined}
                 src={getAppUrl(activeApp)}
                 title={activeApp.title}
@@ -420,9 +275,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         )}
       </main>
 
-      <footer className="py-6 text-center border-t border-slate-100 bg-white">
-        <p className="text-[9px] text-slate-300 font-bold uppercase tracking-[0.4em]">
-          &copy; 2024 EMEF Tarsila do Amaral • Shell de Micro Front-Ends v2.4
+      <footer className="relative z-10 py-6 text-center border-t border-white/10 bg-black/20 backdrop-blur-md">
+        <p className="text-[10px] text-white/70 font-bold uppercase tracking-[0.2em] drop-shadow-md">
+          &copy; 2024 EMEF Tarsila do Amaral &bull; Shell de Micro Front-Ends v2.4
         </p>
       </footer>
     </div>

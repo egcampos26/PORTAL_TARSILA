@@ -184,27 +184,27 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         ></div>
       </div>
 
-      <header className="relative z-50 px-6 md:px-12 py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
+      <header className="relative z-50 px-4 md:px-12 py-3 md:py-6 flex flex-row justify-between items-center gap-2">
+        <div className="flex flex-col gap-0.5 md:gap-1 flex-1 min-w-0">
+          <div className="flex items-center gap-2 md:gap-3">
             {activeApp && (
               <button
                 onClick={handleCloseApp}
-                className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/40 transition-colors"
+                className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/40 transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
               </button>
             )}
-            <h1 className="text-white font-black text-sm md:text-xl uppercase tracking-widest drop-shadow-md">
+            <h1 className="text-white font-black text-[11px] sm:text-sm md:text-xl uppercase tracking-widest drop-shadow-md truncate">
               PORTAL EMEF TARSILA DO AMARAL
             </h1>
           </div>
-          <span className="text-white/80 font-bold text-[10px] md:text-xs uppercase tracking-widest pl-0 md:pl-11 drop-shadow-md">
+          <span className="text-white/80 font-bold text-[8px] sm:text-[10px] md:text-xs uppercase tracking-widest pl-0 md:pl-11 drop-shadow-md truncate">
             {greeting}, <span className="text-white">{userName}</span>
           </span>
         </div>
 
-        <div className="flex items-center gap-4 md:gap-6 self-end md:self-auto">
+        <div className="flex items-center gap-2 md:gap-6 shrink-0">
           <div className="hidden lg:flex items-center gap-2 mr-4 bg-black/20 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
             <span className="text-[9px] text-white/70 font-bold uppercase tracking-widest">Fundo:</span>
             <input 
@@ -221,11 +221,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
             {userEmail}
           </span>
 
-          <button onClick={handleOpenSettings} className="p-2 text-white/80 hover:text-white transition-colors">
-            <svg className="w-5 h-5 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          <button onClick={handleOpenSettings} className="p-1.5 md:p-2 text-white/80 hover:text-white transition-colors">
+            <svg className="w-4 h-4 md:w-5 md:h-5 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           </button>
           
-          <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/30 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors backdrop-blur-sm">
+          <button onClick={onLogout} className="flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg border border-white/30 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors backdrop-blur-sm">
             SAIR <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           </button>
         </div>
@@ -276,8 +276,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         )}
 
         {activeApp && (
-          <div className="absolute inset-0 flex flex-col items-center animate-fade-in bg-slate-900/50 backdrop-blur-md pt-4">
-            <div className="w-full h-full bg-white rounded-t-[2rem] overflow-hidden shadow-2xl flex flex-col">
+          <div className="absolute inset-0 flex flex-col items-center animate-fade-in bg-slate-900/50 backdrop-blur-md pt-2 md:pt-4">
+            <div className="w-full h-full bg-white rounded-t-2xl md:rounded-t-[2rem] overflow-hidden shadow-2xl flex flex-col">
                <iframe
                 id={activeApp.id === 'carometro-alunos' ? 'carometro-frame' : undefined}
                 src={getAppUrl(activeApp)}
@@ -290,8 +290,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, userEmail, userName, user
         )}
       </main>
 
-      <footer className="relative z-10 py-6 text-center border-t border-white/10 bg-black/20 backdrop-blur-md">
-        <p className="text-[10px] text-white/70 font-bold uppercase tracking-[0.2em] drop-shadow-md">
+      <footer className="relative z-10 py-2 md:py-6 text-center border-t border-white/10 bg-black/20 backdrop-blur-md">
+        <p className="text-[7px] md:text-[10px] text-white/70 font-bold uppercase tracking-[0.2em] drop-shadow-md">
           &copy; 2024 EMEF Tarsila do Amaral &bull; Shell de Micro Front-Ends v2.4
         </p>
       </footer>
